@@ -15,7 +15,11 @@ VCD_TOUCH = $(BUILD)/tb_touch_frontend.vcd
 SIM_INPUT = $(BUILD)/tb_input_control
 VCD_INPUT = $(BUILD)/tb_input_control.vcd
 
-.PHONY: sim wave sim-touch wave-touch sim-input wave-input clean
+#Rutas de los archivos de simulación del verilog del sistema completo
+SIM_SYSTEM = $(BUILD)/tb_mcd_system
+VCD_SYSTEM = $(BUILD)/tb_mcd_system.vcd
+
+.PHONY: sim wave sim-touch wave-touch sim-input wave-input sim-system wave-system clean
 
 $(BUILD):
 	mkdir -p $(BUILD)
@@ -62,6 +66,27 @@ sim-input: $(BUILD)
 wave-input:
 	test -f $(VCD_INPUT)
 	$(SURFER) $(VCD_INPUT)
+
+#-----------------System
+sim-system: $(BUILD)
+	iverilog -g2012 \
+		-I rtl/core \
+		-I rtl/ui \
+		-I rtl/system \
+		-o $(SIM_SYSTEM) \
+		rtl/ui/sync_2ff.v \
+		rtl/ui/edge_pulse.v \
+		rtl/ui/touch_frontend.v \
+		rtl/ui/input_control.v \
+		rtl/core/mcd_top.v \
+		rtl/system/mcd_system.v \
+		sim/tb_mcd_system.v
+	vvp $(SIM_SYSTEM)
+
+
+wave-system:
+	test -f $(VCD_SYSTEM)
+	$(SURFER) $(VCD_SYSTEM)
 
 #-----------------clean
 clean:
