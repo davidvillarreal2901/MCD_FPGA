@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Simulación
+build/
+*.vcd
+*.fst
+*.out
+
+# Ejecutables de simulación
+simv
+a.out
+
+# Yosys / síntesis temporal
+*.json
+*.config
+*.bit
+*.bin
+*.rpt
+
+# Editores
+.vscode/
