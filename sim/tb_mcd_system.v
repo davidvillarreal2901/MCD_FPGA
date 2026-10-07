@@ -6,7 +6,7 @@ module tb_mcd_system;
     reg rst;
 
     reg [7:0] touch_raw;
-    reg       button_pulse;
+    reg       button_n;
 
 
     wire [7:0] led_value;
@@ -23,17 +23,24 @@ module tb_mcd_system;
     wire [7:0] touch_sync_out;
     wire [7:0] touch_pulse_out;
 
+    wire button_sync_out;
+    wire button_clean_out;
+    wire button_pulse_out;
+
 
     // ============================================================
     // DUT
     // ============================================================
 
-    mcd_system dut (
+    mcd_system #(
+    // Pequeño únicamente para simulación.
+    .BUTTON_DEBOUNCE_COUNT(4)
+    ) dut (
         .clk             (clk),
         .rst             (rst),
 
         .touch_raw       (touch_raw),
-        .button_pulse    (button_pulse),
+        .button_n    (button_n),
 
         .led_value       (led_value),
 
@@ -47,7 +54,11 @@ module tb_mcd_system;
         .ui_state        (ui_state),
 
         .touch_sync_out  (touch_sync_out),
-        .touch_pulse_out (touch_pulse_out)
+        .touch_pulse_out (touch_pulse_out),
+
+        .button_sync_out  (button_sync_out),
+        .button_clean_out (button_clean_out),
+        .button_pulse_out (button_pulse_out)
     );
 
 
@@ -121,22 +132,48 @@ module tb_mcd_system;
     // ============================================================
     // Simular pulsación del botón NEXT / START
     //
-    // Por ahora button_pulse ya representa el pulso procesado.
-    // Después agregaremos el circuito para el botón físico.
+    // Ya tenemos el botón real
     // ============================================================
 
     task press_button;
 
         begin
 
+            // --------------------------------------------------------
+            // Rebote al presionar
+            // --------------------------------------------------------
+
             @(negedge clk);
 
-            button_pulse = 1'b1;
+            #7  button_n = 1'b0;
+            #9  button_n = 1'b1;
+            #8  button_n = 1'b0;
+            #7  button_n = 1'b1;
+            #9  button_n = 1'b0;
 
+
+            // Mantener pulsado el tiempo suficiente para superar
+            // el debounce.
+            repeat (8)
+                @(posedge clk);
+
+
+            // --------------------------------------------------------
+            // Rebote al soltar
+            // --------------------------------------------------------
 
             @(negedge clk);
 
-            button_pulse = 1'b0;
+            #6  button_n = 1'b1;
+            #8  button_n = 1'b0;
+            #7  button_n = 1'b1;
+            #9  button_n = 1'b0;
+            #8  button_n = 1'b1;
+
+
+            // Dejarlo liberado.
+            repeat (8)
+                @(posedge clk);
 
         end
 
@@ -151,7 +188,7 @@ module tb_mcd_system;
 
         rst          = 1'b1;
         touch_raw    = 8'd0;
-        button_pulse = 1'b0;
+        button_n     = 1'b1;
 
 
         // --------------------------------------------------------

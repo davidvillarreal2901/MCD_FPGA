@@ -1,15 +1,16 @@
 //Este es pa conectar touch + input_control + mcd_top
 
-module mcd_system (
+module mcd_system #(
+    parameter integer BUTTON_DEBOUNCE_COUNT = 250000
+)(
     input  wire       clk,
     input  wire       rst,
 
     // Entradas físicas provenientes de los botoncitos
     input  wire [7:0] touch_raw,
 
-    // Por ahora el botón ya entra como pulso limpio.
-    // Más adelante agregaré sincronización + debounce.
-    input  wire       button_pulse,
+    // Entrada física asíncrona del botón, ahora si con el debounce
+    input  wire       button_n,
 
     // Valor que irá a los 8 LED
     output wire [7:0] led_value,
@@ -26,7 +27,11 @@ module mcd_system (
 
     // También las dejo visibles pa' simulación
     output wire [7:0] touch_sync_out,
-    output wire [7:0] touch_pulse_out
+    output wire [7:0] touch_pulse_out,
+
+    output wire       button_sync_out,
+    output wire       button_clean_out,
+    output wire       button_pulse_out
 );
 
     // Señales internas
@@ -34,6 +39,10 @@ module mcd_system (
 
     wire [7:0] touch_sync;
     wire [7:0] touch_pulse;
+
+    wire button_sync;
+    wire button_clean;
+    wire button_pulse;
 
     wire [7:0] A;
     wire [7:0] B;
@@ -67,7 +76,29 @@ module mcd_system (
         .touch_pulse (touch_pulse)
     );
 
+    // Interfaz del botón físico
+    //
+    // button_n:
+    // señal física/asíncrona proveniente del botón.
+    //
+    // button_sync:
+    // señal ya sincronizada con clk.
+    // button_clean:
+    // señal ya sincronizada y con antirrebote.
+    // button_pulse:
+    // pulso de un ciclo por cada nueva pulsación.
 
+    button_frontend #(
+        .DEBOUNCE_COUNT(BUTTON_DEBOUNCE_COUNT)
+    ) u_button (
+        .clk          (clk),
+        .rst          (rst),
+        .button_n     (button_n),
+
+        .button_pulse (button_pulse),
+        .button_sync  (button_sync),
+        .button_clean (button_clean)
+    );
 
     // Control de interfaz
     //
@@ -134,5 +165,9 @@ module mcd_system (
 
     assign touch_sync_out  = touch_sync;
     assign touch_pulse_out = touch_pulse;
+
+    assign button_sync_out  = button_sync;
+    assign button_clean_out = button_clean;
+    assign button_pulse_out = button_pulse;
 
 endmodule
