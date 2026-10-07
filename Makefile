@@ -1,23 +1,49 @@
+#Definiciones generales
 BUILD = build
 
-TB_MCD = sim/tb_mcd.v
-SIM_MCD = $(BUILD)/tb_mcd
-VCD_MCD = $(BUILD)/tb_mcd.vcd
+SURFER = /Applications/surfer
+
+#Rutas de los archivos de simulación del verilog del drive
+SIM = $(BUILD)/tb_mcd
+VCD = $(BUILD)/tb_mcd.vcd
+
+#Rutas de los archivos de simulación del verilog del touch	
+SIM_TOUCH = $(BUILD)/tb_touch_frontend
+VCD_TOUCH = $(BUILD)/tb_touch_frontend.vcd
 
 .PHONY: sim wave clean
 
 $(BUILD):
 	mkdir -p $(BUILD)
 
+#-----------------MCD
 sim: $(BUILD)
 	iverilog -g2012 \
 		-I rtl/core \
-		-o $(SIM_MCD) \
-		$(TB_MCD)
-	vvp $(SIM_MCD)
+		-o $(SIM) \
+		sim/tb_mcd.v
+	vvp $(SIM)
 
 wave:
-	surfer $(VCD_MCD)
+	test -f $(VCD)
+	$(SURFER) $(VCD)
 
+
+#-----------------Touch
+sim-touch: $(BUILD)
+	iverilog -g2012 \
+		-I rtl/ui \
+		-o $(SIM_TOUCH) \
+		rtl/ui/sync_2ff.v \
+		rtl/ui/edge_pulse.v \
+		rtl/ui/touch_frontend.v \
+		sim/tb_touch_frontend.v
+	vvp $(SIM_TOUCH)
+
+wave-touch:
+	test -f $(VCD_TOUCH)
+	$(SURFER) $(VCD_TOUCH)
+
+#-----------------clean
 clean:
 	rm -rf $(BUILD)
