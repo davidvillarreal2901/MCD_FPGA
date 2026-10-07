@@ -1,27 +1,37 @@
 # ============================================================
-# Colorlight i9 v7.2 - MCD
-# LFE5U-45F-6BG381C
+# Colorlight i9 v7.2
+# Lattice ECP5 LFE5U-45F
 # ============================================================
 
-# ---------------- Clock / reset ----------------
+
+# ------------------------------------------------------------
+# CLOCK 25 MHz
+# ------------------------------------------------------------
 
 LOCATE COMP "clk25" SITE "P3";
 IOBUF PORT "clk25" IO_TYPE=LVCMOS33;
+
+
+# ------------------------------------------------------------
+# RESET DE LA PLACA
+# ------------------------------------------------------------
 
 LOCATE COMP "cpu_reset_n" SITE "K18";
 IOBUF PORT "cpu_reset_n" IO_TYPE=LVCMOS33 PULLMODE=UP;
 
 
-# ---------------- Touch TTP226 ----------------
+# ------------------------------------------------------------
+# TTP226 - 8 entradas
+# ------------------------------------------------------------
 
-LOCATE COMP "touch[0]" SITE "J20";
-LOCATE COMP "touch[1]" SITE "L18";
-LOCATE COMP "touch[2]" SITE "M18";
-LOCATE COMP "touch[3]" SITE "N17";
-LOCATE COMP "touch[4]" SITE "G20";
-LOCATE COMP "touch[5]" SITE "K20";
-LOCATE COMP "touch[6]" SITE "L20";
-LOCATE COMP "touch[7]" SITE "N18";
+LOCATE COMP "touch[0]" SITE "R3";
+LOCATE COMP "touch[1]" SITE "M4";
+LOCATE COMP "touch[2]" SITE "L5";
+LOCATE COMP "touch[3]" SITE "J16";
+LOCATE COMP "touch[4]" SITE "N4";
+LOCATE COMP "touch[5]" SITE "L4";
+LOCATE COMP "touch[6]" SITE "P16";
+LOCATE COMP "touch[7]" SITE "J18";
 
 IOBUF PORT "touch[0]" IO_TYPE=LVCMOS33;
 IOBUF PORT "touch[1]" IO_TYPE=LVCMOS33;
@@ -33,13 +43,17 @@ IOBUF PORT "touch[6]" IO_TYPE=LVCMOS33;
 IOBUF PORT "touch[7]" IO_TYPE=LVCMOS33;
 
 
-# ---------------- NEXT / START button ----------------
+# ------------------------------------------------------------
+# BOTON NEXT / START
+# ------------------------------------------------------------
 
 LOCATE COMP "button_n" SITE "P17";
 IOBUF PORT "button_n" IO_TYPE=LVCMOS33 PULLMODE=UP;
 
 
-# ---------------- Binary LEDs ----------------
+# ------------------------------------------------------------
+# 8 LED EXTERNOS
+# ------------------------------------------------------------
 
 LOCATE COMP "led[0]" SITE "H4";
 LOCATE COMP "led[1]" SITE "G3";
@@ -60,36 +74,9 @@ IOBUF PORT "led[6]" IO_TYPE=LVCMOS33 DRIVE=4;
 IOBUF PORT "led[7]" IO_TYPE=LVCMOS33 DRIVE=4;
 
 
-# ---------------- Logic analyzer ----------------
-
-LOCATE COMP "debug[0]" SITE "R3";
-LOCATE COMP "debug[1]" SITE "M4";
-LOCATE COMP "debug[2]" SITE "L5";
-LOCATE COMP "debug[3]" SITE "J16";
-LOCATE COMP "debug[4]" SITE "N4";
-LOCATE COMP "debug[5]" SITE "L4";
-LOCATE COMP "debug[6]" SITE "P16";
-LOCATE COMP "debug[7]" SITE "J18";
-
-IOBUF PORT "debug[0]" IO_TYPE=LVCMOS33 DRIVE=4;
-IOBUF PORT "debug[1]" IO_TYPE=LVCMOS33 DRIVE=4;
-IOBUF PORT "debug[2]" IO_TYPE=LVCMOS33 DRIVE=4;
-IOBUF PORT "debug[3]" IO_TYPE=LVCMOS33 DRIVE=4;
-IOBUF PORT "debug[4]" IO_TYPE=LVCMOS33 DRIVE=4;
-IOBUF PORT "debug[5]" IO_TYPE=LVCMOS33 DRIVE=4;
-IOBUF PORT "debug[6]" IO_TYPE=LVCMOS33 DRIVE=4;
-IOBUF PORT "debug[7]" IO_TYPE=LVCMOS33 DRIVE=4;
-
-
-# ---------------- On-board status LED ----------------
+# ------------------------------------------------------------
+# LED D2 integrado - activo en bajo
+# ------------------------------------------------------------
 
 LOCATE COMP "user_led_n" SITE "L2";
 IOBUF PORT "user_led_n" IO_TYPE=LVCMOS33;
-
-
-# OLED - habilitaremos estos cuando agreguemos el controlador
-#
-# LOCATE COMP "oled_sda" SITE "F5";
-# LOCATE COMP "oled_scl" SITE "E5";
-# IOBUF PORT "oled_sda" IO_TYPE=LVCMOS33 PULLMODE=UP;
-# IOBUF PORT "oled_scl" IO_TYPE=LVCMOS33 PULLMODE=UP;

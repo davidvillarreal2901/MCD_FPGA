@@ -23,7 +23,17 @@ VCD_SYSTEM = $(BUILD)/tb_mcd_system.vcd
 SIM_BUTTON = $(BUILD)/tb_button_frontend
 VCD_BUTTON = $(BUILD)/tb_button_frontend.vcd
 
+#Rutas de los archivos de síntesis para la placa Colorlight
+COLORLIGHT_BUILD  = $(BUILD)/colorlight
+COLORLIGHT_TOP    = top_colorlight
+
+COLORLIGHT_JSON   = $(COLORLIGHT_BUILD)/$(COLORLIGHT_TOP).json
+COLORLIGHT_CONFIG = $(COLORLIGHT_BUILD)/$(COLORLIGHT_TOP).config
+COLORLIGHT_BIT    = $(COLORLIGHT_BUILD)/$(COLORLIGHT_TOP).bit
+
+
 .PHONY: sim wave sim-touch wave-touch sim-input wave-input sim-system wave-system sim-button wave-button clean
+.PHONY: colorlight-synth colorlight-pnr colorlight-bit colorlight-load
 
 $(BUILD):
 	mkdir -p $(BUILD)
@@ -109,6 +119,51 @@ sim-button: $(BUILD)
 wave-button:
 	test -f $(VCD_BUTTON)
 	$(SURFER) $(VCD_BUTTON)
+
+#-----------------Colorlight
+colorlight-synth:
+	mkdir -p $(COLORLIGHT_BUILD)
+
+	yosys -p "\
+		read_verilog \
+			-Irtl/core \
+			-Irtl/ui \
+			-Irtl/system \
+			rtl/ui/sync_2ff.v \
+			rtl/ui/edge_pulse.v \
+			rtl/ui/debounce.v \
+			rtl/ui/touch_frontend.v \
+			rtl/ui/button_frontend.v \
+			rtl/ui/input_control.v \
+			rtl/core/mcd_top.v \
+			rtl/system/mcd_system.v \
+			boards/colorlight_i9/top_colorlight.v; \
+		synth_ecp5 \
+			-top $(COLORLIGHT_TOP) \
+			-json $(COLORLIGHT_JSON); \
+		stat"
+
+
+colorlight-pnr: colorlight-synth
+	nextpnr-ecp5 \
+		--45k \
+		--package CABGA381 \
+		--json $(COLORLIGHT_JSON) \
+		--lpf boards/colorlight_i9/colorlight_i9.lpf \
+		--textcfg $(COLORLIGHT_CONFIG) \
+		--freq 25
+
+
+colorlight-bit: colorlight-pnr
+	ecppack \
+		$(COLORLIGHT_CONFIG) \
+		$(COLORLIGHT_BIT)
+
+
+colorlight-load: colorlight-bit
+	openFPGALoader \
+		-b colorlight-i9 \
+		$(COLORLIGHT_BIT)
 
 #-----------------clean
 clean:
