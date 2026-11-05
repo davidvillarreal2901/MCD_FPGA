@@ -1,6 +1,10 @@
 #include <systemc.h>
 #include "mcd.h"
 
+//Incluyo el stim y el mon
+#include "../mcd_systemc/stim.h"
+#include "../mcd_systemc/mon.h"
+
 int sc_main(int argc, char* argv[]) {
 
     sc_clock clk("clk", 10, SC_NS);
@@ -26,6 +30,28 @@ int sc_main(int argc, char* argv[]) {
     mcd.x(x);
     mcd.y(y);
     mcd.done(done);
+
+    //-------------------------Acá meto las señales para el sim.h y el mon.h
+
+    // Generador de estimulos compartido
+    stim stimulus("stimulus");
+    stimulus.clk(clk);
+    stimulus.done(done);
+    stimulus.rst(reset);
+    stimulus.start(start);
+    stimulus.A(x_in);
+    stimulus.B(y_in);
+
+    // Monitor autoverificable compartido
+    mon monitor("monitor");
+    monitor.clk(clk);
+    monitor.start(start);
+    monitor.done(done);
+    monitor.A(x_in);
+    monitor.B(y_in);
+    monitor.MCD(x);  // Cuando done=1, x contiene el MCD
+
+    //----------------------------------------------------------------------
 
     // Valores iniciales
     reset.write(true);
